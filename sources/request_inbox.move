@@ -120,7 +120,7 @@ module hermes::request_inbox {
         })
     }
 
-    public fun register_request_inbox(user: &signer) acquires State {
+    public entry fun register_request_inbox(user: &signer) acquires State {
         // TODO: assert user has a kade username
 
         let resource_address = account::create_resource_address(&@hermes, SEED);
@@ -145,14 +145,14 @@ module hermes::request_inbox {
         })
     }
 
-    public fun create_delegate_link_intent(user: &signer, delegate_address: address) acquires RequestInbox {
+    public entry fun create_delegate_link_intent(user: &signer, delegate_address: address) acquires RequestInbox {
         let user_address = signer::address_of(user);
 
         let inbox = borrow_global_mut<RequestInbox>(user_address);
         inbox.pending_delegate_link = option::some(delegate_address)
     }
 
-    public fun register_delegate(delegate: &signer, user_address: address) acquires State, RequestInbox {
+    public entry fun register_delegate(delegate: &signer, user_address: address) acquires State, RequestInbox {
         let delegate_address = signer::address_of(delegate);
         let resource_address = account::create_resource_address(&@hermes, SEED);
 
@@ -187,7 +187,7 @@ module hermes::request_inbox {
 
     }
 
-    public fun remove_delegate(user: &signer, delegate_address: address) acquires Delegate, RequestInbox {
+    public entry fun remove_delegate(user: &signer, delegate_address: address) acquires Delegate, RequestInbox {
         let user_address = signer::address_of(user);
         let inbox = borrow_global<RequestInbox>(user_address);
 
@@ -204,7 +204,7 @@ module hermes::request_inbox {
 
     }
 
-    public fun request_conversation(requester: &signer, user_address: address, envelope: string::String) acquires RequestInbox {
+    public entry fun request_conversation(requester: &signer, user_address: address, envelope: string::String) acquires RequestInbox {
         assert!(exists<RequestInbox>(signer::address_of(requester)), EINBOX_NOT_REGISTERED);
         assert!(exists<RequestInbox>(user_address), EINBOX_NOT_REGISTERED);
 
@@ -229,7 +229,7 @@ module hermes::request_inbox {
         })
     }
 
-    public fun delegate_request_conversation(delegate: &signer, user_address: address, envelope: string::String) acquires RequestInbox, Delegate {
+    public entry fun delegate_request_conversation(delegate: &signer, user_address: address, envelope: string::String) acquires RequestInbox, Delegate {
         let delegate_address = signer::address_of(delegate);
         let delegate_state = borrow_global<Delegate>(delegate_address);
 
@@ -257,7 +257,7 @@ module hermes::request_inbox {
 
     }
 
-    public fun accept_request(user: &signer, requester_address: address) acquires RequestInbox {
+    public entry fun accept_request(user: &signer, requester_address: address) acquires RequestInbox {
         let user_address = signer::address_of(user);
         assert!(exists<RequestInbox>(user_address), EINBOX_NOT_REGISTERED);
         assert!(exists<RequestInbox>(requester_address), EINBOX_NOT_REGISTERED);
@@ -287,7 +287,7 @@ module hermes::request_inbox {
 
     }
 
-    public fun delegate_accept_request(delegate: &signer, requester_address: address) acquires  RequestInbox, Delegate {
+    public entry fun delegate_accept_request(delegate: &signer, requester_address: address) acquires  RequestInbox, Delegate {
         let delegate_address = signer::address_of(delegate);
 
         assert!(exists<Delegate>(delegate_address), ENoDelegateFound);
@@ -321,7 +321,7 @@ module hermes::request_inbox {
 
     }
 
-    public fun deny_request(user: &signer, requester_address: address) acquires RequestInbox {
+    public entry fun deny_request(user: &signer, requester_address: address) acquires RequestInbox {
         let user_address = signer::address_of(user);
         assert_has_inbox(user_address);
         assert_has_inbox(requester_address);
@@ -343,7 +343,7 @@ module hermes::request_inbox {
         })
     }
 
-    public fun delegate_deny_request(delegate: &signer, requester_address: address) acquires RequestInbox, Delegate {
+    public entry fun delegate_deny_request(delegate: &signer, requester_address: address) acquires RequestInbox, Delegate {
         let delegate_address = signer::address_of(delegate);
         assert!(exists<Delegate>(delegate_address), ENoDelegateFound);
 
@@ -363,7 +363,7 @@ module hermes::request_inbox {
         })
     }
 
-    public fun remove_from_phone_book(user: &signer, unwanted_address: address) acquires RequestInbox {
+    public entry fun remove_from_phone_book(user: &signer, unwanted_address: address) acquires RequestInbox {
         let user_address = signer::address_of(user);
         assert_has_inbox(user_address);
         assert_has_inbox(unwanted_address);
@@ -385,7 +385,7 @@ module hermes::request_inbox {
         })
     }
 
-    public fun delegate_remove_from_phone_book(delegate: &signer, unwanted_address: address) acquires  RequestInbox, Delegate {
+    public entry fun delegate_remove_from_phone_book(delegate: &signer, unwanted_address: address) acquires  RequestInbox, Delegate {
         let delegate_address = signer::address_of(delegate);
 
         assert!(exists<Delegate>(delegate_address), ENoDelegateFound);
@@ -512,6 +512,10 @@ module hermes::request_inbox {
     public(friend) fun get_delegate_owner(delegate_address: address): address acquires Delegate {
         let delegate = borrow_global<Delegate>(delegate_address);
         delegate.owner_address
+    }
+
+    public fun is_delegate(addr: address): bool {
+        return exists<Delegate>(addr)
     }
 
     #[test_only]

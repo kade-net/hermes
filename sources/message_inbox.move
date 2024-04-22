@@ -6,6 +6,7 @@ module hermes::message_inbox {
     use aptos_framework::account;
     use aptos_framework::event::emit;
     use aptos_framework::timestamp;
+    use hermes::request_inbox::is_delegate;
     use hermes::request_inbox;
     #[test_only]
     use std::vector;
@@ -96,6 +97,15 @@ module hermes::message_inbox {
             ref
         })
 
+    }
+
+    public entry fun send(sender: &signer, to: address, content: string::String, ref: string::String) acquires State {
+        let addr = signer::address_of(sender);
+        if(is_delegate(addr)){
+            delegate_send_envelope(sender, to, content, ref)
+        }else{
+            send_envelope(sender, to, content, ref)
+        }
     }
 
 
