@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8e82fa4f-b3c3-446b-b30f-b51428814729" name="Changes" comment="" />
+    <list default="true" id="8e82fa4f-b3c3-446b-b30f-b51428814729" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sources/message_inbox.move" beforeDir="false" afterPath="$PROJECT_DIR$/sources/message_inbox.move" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sources/request_inbox.move" beforeDir="false" afterPath="$PROJECT_DIR$/sources/request_inbox.move" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -17,6 +21,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -27,6 +34,7 @@
     <option name="version" value="2" />
   </component>
   <component name="ProjectId" id="2f2wDrpSaR8AsYGmkhCPBTugLgs" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -39,46 +47,46 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;language.move&quot;
   }
 }</component>
-  <component name="RunManager" selected="Aptos.Test message_inbox::test_send_envelope">
+  <component name="RunManager" selected="Aptos.Test message_inbox::test_delegate_send_envelope">
     <configuration name="Build" type="AptosCommandConfiguration" factoryName="RunCommand">
       <option name="command" value="" />
       <envs />
       <method v="2" />
     </configuration>
-    <configuration name="Test message_inbox::test_init" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
-      <option name="command" value="move test --filter message_inbox::test_init" />
+    <configuration name="Test message_inbox::test_delegate_send_envelope" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
+      <option name="command" value="move test --filter message_inbox::test_delegate_send_envelope" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs>
         <env name="APTOS_DISABLE_TELEMETRY" value="true" />
       </envs>
       <method v="2" />
     </configuration>
-    <configuration name="Test message_inbox::test_send_envelope" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
-      <option name="command" value="move test --filter message_inbox::test_send_envelope" />
+    <configuration name="Test request_inbox::test_delegate_create_conversation_request (1)" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
+      <option name="command" value="move test --filter request_inbox::test_delegate_create_conversation_request" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs>
         <env name="APTOS_DISABLE_TELEMETRY" value="true" />
       </envs>
       <method v="2" />
     </configuration>
-    <configuration name="Test request_inbox::test_accept_conversation_request" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
-      <option name="command" value="move test --filter request_inbox::test_accept_conversation_request" />
+    <configuration name="Test request_inbox::test_delegate_create_conversation_request (2)" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
+      <option name="command" value="move test --filter request_inbox::test_delegate_create_conversation_request" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs>
         <env name="APTOS_DISABLE_TELEMETRY" value="true" />
       </envs>
       <method v="2" />
     </configuration>
-    <configuration name="Test request_inbox::test_deny_conversation_request" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
-      <option name="command" value="move test --filter request_inbox::test_deny_conversation_request" />
+    <configuration name="Test request_inbox::test_delegate_create_conversation_request" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
+      <option name="command" value="move test --filter request_inbox::test_delegate_create_conversation_request" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs>
         <env name="APTOS_DISABLE_TELEMETRY" value="true" />
       </envs>
       <method v="2" />
     </configuration>
-    <configuration name="Test request_inbox::test_remove_from_phonebook" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
-      <option name="command" value="move test --filter request_inbox::test_remove_from_phonebook" />
+    <configuration name="Test request_inbox::test_delegate_deny_request" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
+      <option name="command" value="move test --filter request_inbox::test_delegate_deny_request" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs>
         <env name="APTOS_DISABLE_TELEMETRY" value="true" />
@@ -87,11 +95,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Aptos.Test message_inbox::test_send_envelope" />
-        <item itemvalue="Aptos.Test message_inbox::test_init" />
-        <item itemvalue="Aptos.Test request_inbox::test_remove_from_phonebook" />
-        <item itemvalue="Aptos.Test request_inbox::test_deny_conversation_request" />
-        <item itemvalue="Aptos.Test request_inbox::test_accept_conversation_request" />
+        <item itemvalue="Aptos.Test message_inbox::test_delegate_send_envelope" />
+        <item itemvalue="Aptos.Test request_inbox::test_delegate_deny_request" />
+        <item itemvalue="Aptos.Test request_inbox::test_delegate_create_conversation_request (2)" />
+        <item itemvalue="Aptos.Test request_inbox::test_delegate_create_conversation_request (1)" />
+        <item itemvalue="Aptos.Test request_inbox::test_delegate_create_conversation_request" />
       </list>
     </recent_temporary>
   </component>
@@ -105,6 +113,17 @@
       <updated>1713012365543</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
