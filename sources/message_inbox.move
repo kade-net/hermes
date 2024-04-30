@@ -25,7 +25,10 @@ module hermes::message_inbox {
         content: string::String,
         timestamp: u64,
         hid: u64,
-        ref: string::String
+        ref: string::String,
+        inbox_name: string::String,
+        sender_public_key: string::String,
+        receiver_public_key: string::String
     }
 
 
@@ -46,11 +49,13 @@ module hermes::message_inbox {
     }
 
     fun send_envelope(user: &signer, receiver_address: address, content: string::String, ref: string::String) acquires  State {
+
         // Allow self messaging
         let sender_address = signer::address_of(user);
         request_inbox::assert_has_inbox(sender_address);
         request_inbox::assert_has_inbox(receiver_address);
         request_inbox::assert_is_in_inbox(receiver_address, sender_address);
+        let inbox_name = request_inbox::get_formatted_inbox_name(sender_address, receiver_address);
 
         let resource_address = account::create_resource_address(&@hermes, SEED);
 
@@ -66,7 +71,10 @@ module hermes::message_inbox {
             hid: current_hid,
             receiver: receiver_address,
             sender: sender_address,
-            ref
+            ref,
+            inbox_name,
+            sender_public_key: request_inbox::get_public_key(sender_address),
+            receiver_public_key: request_inbox::get_public_key(receiver_address)
         })
 
     }
@@ -75,6 +83,7 @@ module hermes::message_inbox {
         let delegate_address = signer::address_of(delegate);
         request_inbox::assert_is_delegate(delegate_address);
         let sender_address = request_inbox::get_delegate_owner(delegate_address);
+        let inbox_name = request_inbox::get_formatted_inbox_name(sender_address, reciever_address);
 
         request_inbox::assert_has_inbox(sender_address);
         request_inbox::assert_has_inbox(reciever_address);
@@ -94,7 +103,10 @@ module hermes::message_inbox {
             hid: current_hid,
             receiver: reciever_address,
             sender: sender_address,
-            ref
+            ref,
+            sender_public_key: request_inbox::get_public_key(sender_address),
+            receiver_public_key: request_inbox::get_public_key(reciever_address),
+            inbox_name
         })
 
     }
@@ -133,8 +145,8 @@ module hermes::message_inbox {
 
         request_inbox::init_for_test(&admin);
 
-        request_inbox::register_request_inbox(&user_account);
-        request_inbox::register_request_inbox(&second_user_account);
+        request_inbox::register_request_inbox(&user_account, string::utf8(b""));
+        request_inbox::register_request_inbox(&second_user_account, string::utf8(b""));
 
         request_inbox::request_conversation(&second_user_account, signer::address_of(&user_account), string::utf8(b""));
 
@@ -167,10 +179,10 @@ module hermes::message_inbox {
 
         request_inbox::init_for_test(&admin);
 
-        request_inbox::register_request_inbox(&user_account);
+        request_inbox::register_request_inbox(&user_account, string::utf8(b""));
         request_inbox::create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
         request_inbox::register_delegate(&delegate_account, signer::address_of(&user_account));
-        request_inbox::register_request_inbox(&second_user_account);
+        request_inbox::register_request_inbox(&second_user_account, string::utf8(b""));
         request_inbox::create_delegate_link_intent(&second_user_account, signer::address_of(&second_delegate));
         request_inbox::register_delegate(&second_delegate, signer::address_of(&second_user_account));
 
@@ -182,6 +194,8 @@ module hermes::message_inbox {
 
 
         let envelopes_sent = emitted_events<Envelope>();
+
+        debug::print(&envelopes_sent);
 
         assert!(vector::length(&envelopes_sent) == 2, 0);
 

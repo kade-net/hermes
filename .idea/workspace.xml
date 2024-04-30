@@ -48,10 +48,18 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;language.move&quot;
   }
 }</component>
-  <component name="RunManager" selected="Aptos.Test message_inbox::test_delegate_send_envelope">
+  <component name="RunManager" selected="Aptos.Test message_inbox::test_delegate_send_envelope (1)">
     <configuration name="Build" type="AptosCommandConfiguration" factoryName="RunCommand">
       <option name="command" value="" />
       <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Test message_inbox::test_delegate_send_envelope (1)" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
+      <option name="command" value="move test --filter message_inbox::test_delegate_send_envelope" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs>
+        <env name="APTOS_DISABLE_TELEMETRY" value="true" />
+      </envs>
       <method v="2" />
     </configuration>
     <configuration name="Test message_inbox::test_delegate_send_envelope" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
@@ -78,14 +86,6 @@
       </envs>
       <method v="2" />
     </configuration>
-    <configuration name="Test request_inbox::test_delegate_create_conversation_request" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
-      <option name="command" value="move test --filter request_inbox::test_delegate_create_conversation_request" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs>
-        <env name="APTOS_DISABLE_TELEMETRY" value="true" />
-      </envs>
-      <method v="2" />
-    </configuration>
     <configuration name="Test request_inbox::test_delegate_deny_request" type="AptosCommandConfiguration" factoryName="AnyCommand" temporary="true">
       <option name="command" value="move test --filter request_inbox::test_delegate_deny_request" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -96,11 +96,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Aptos.Test message_inbox::test_delegate_send_envelope (1)" />
         <item itemvalue="Aptos.Test message_inbox::test_delegate_send_envelope" />
         <item itemvalue="Aptos.Test request_inbox::test_delegate_deny_request" />
         <item itemvalue="Aptos.Test request_inbox::test_delegate_create_conversation_request (2)" />
         <item itemvalue="Aptos.Test request_inbox::test_delegate_create_conversation_request (1)" />
-        <item itemvalue="Aptos.Test request_inbox::test_delegate_create_conversation_request" />
       </list>
     </recent_temporary>
   </component>

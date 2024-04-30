@@ -7,6 +7,7 @@ module hermes::request_inbox {
     use std::signer;
     use std::string;
     use std::vector;
+    use aptos_std::string_utils;
     use aptos_framework::account;
     use aptos_framework::account::SignerCapability;
     use aptos_framework::event::emit;
@@ -36,14 +37,16 @@ module hermes::request_inbox {
     struct Request has store, drop, copy {
         address: address,
         timestamp: u64,
-        envelope: string::String
+        envelope: string::String,
+        connection_owner: address
     }
 
     #[event]
     struct RequestInboxRegisterEvent has store, drop, copy {
         user_address: address,
         timestamp: u64,
-        hid: u64
+        hid: u64,
+        public_key: string::String
     }
 
     #[event]
@@ -51,21 +54,24 @@ module hermes::request_inbox {
         requester_address: address,
         inbox_owner_address: address,
         envelope: string::String,
-        timestamp: u64
+        timestamp: u64,
+        inbox_name: string::String,
     }
 
     #[event]
     struct AcceptRequestEvent has store, drop, copy {
         requester_address: address,
         inbox_owner_address: address,
-        timestamp: u64
+        timestamp: u64,
+        inbox_name: string::String
     }
 
     #[event]
     struct RequestDeniedEvent has store, drop, copy  {
         requester_address: address,
         inbox_owner_address: address,
-        timestamp: u64
+        timestamp: u64,
+        inbox_name: string::String
     }
 
     #[event]
@@ -73,6 +79,7 @@ module hermes::request_inbox {
         inbox_owner_address: address,
         timestamp: u64,
         requester_address: address,
+        inbox_name: string::String
     }
 
     #[event]
@@ -95,7 +102,8 @@ module hermes::request_inbox {
         pending_requests: vector<Request>,
         phone_book: vector<Request>,
         pending_delegate_link: Option<address>,
-        hid: u64
+        hid: u64,
+        public_key: string::String
     }
 
     struct Delegate has key, drop {
@@ -120,7 +128,7 @@ module hermes::request_inbox {
         })
     }
 
-    public entry fun register_request_inbox(user: &signer) acquires State {
+    public entry fun register_request_inbox(user: &signer, pub: string::String) acquires State {
         // TODO: assert user has a kade username
 
         let resource_address = account::create_resource_address(&@hermes, SEED);
@@ -135,13 +143,15 @@ module hermes::request_inbox {
             pending_requests: vector::empty(),
             phone_book: vector::empty(),
             pending_delegate_link: option::none(),
-            hid: user_id
+            hid: user_id,
+            public_key: pub
         });
 
         emit(RequestInboxRegisterEvent {
             timestamp: timestamp::now_microseconds(),
             user_address: signer::address_of(user),
-            hid: user_id
+            hid: user_id,
+            public_key: pub
         })
     }
 
@@ -214,7 +224,8 @@ module hermes::request_inbox {
         let newRequest = Request {
             address: signer::address_of(requester),
             timestamp: timestamp::now_microseconds(),
-            envelope
+            envelope,
+            connection_owner: user_address,
         };
 
         let inbox = borrow_global_mut<RequestInbox>(user_address);
@@ -225,7 +236,8 @@ module hermes::request_inbox {
             envelope,
             inbox_owner_address: user_address,
             requester_address: signer::address_of(requester),
-            timestamp: timestamp::now_microseconds()
+            timestamp: timestamp::now_microseconds(),
+            inbox_name: string_utils::format2(&b"{}:{}", user_address, signer::address_of(requester))
         })
     }
 
@@ -241,7 +253,8 @@ module hermes::request_inbox {
         let newRequest = Request {
             address: delegate_owner_address,
             timestamp: timestamp::now_microseconds(),
-            envelope
+            envelope,
+            connection_owner: user_address
         };
 
         let inbox = borrow_global_mut<RequestInbox>(user_address);
@@ -252,7 +265,8 @@ module hermes::request_inbox {
             envelope,
             timestamp: timestamp::now_microseconds(),
             requester_address: delegate_owner_address,
-            inbox_owner_address: user_address
+            inbox_owner_address: user_address,
+            inbox_name: string_utils::format2(&b"{}:{}", user_address, delegate_owner_address)
         });
 
     }
@@ -275,14 +289,16 @@ module hermes::request_inbox {
 
         let request = vector::remove(&mut inbox.pending_requests, index);
 
-        add_to_phonebook(user_address, requester_address, request.envelope);
-        add_to_phonebook(requester_address, user_address, request.envelope);
+        add_to_phonebook(user_address, requester_address, request.envelope, request.connection_owner);
+        add_to_phonebook(requester_address, user_address, request.envelope, request.connection_owner);
 
+        let inbox_name = get_formatted_inbox_name(requester_address, user_address);
 
         emit(AcceptRequestEvent {
             requester_address,
             timestamp: timestamp::now_microseconds(),
-            inbox_owner_address: user_address
+            inbox_owner_address: user_address,
+            inbox_name
         })
 
     }
@@ -309,14 +325,16 @@ module hermes::request_inbox {
 
         let request = vector::remove(&mut inbox.pending_requests, index);
 
-        add_to_phonebook(user_address, requester_address, request.envelope);
-        add_to_phonebook(requester_address, user_address, request.envelope);
+        add_to_phonebook(user_address, requester_address, request.envelope, request.connection_owner);
+        add_to_phonebook(requester_address, user_address, request.envelope, request.connection_owner);
 
+        let inbox_name = get_formatted_inbox_name(requester_address, user_address);
 
         emit(AcceptRequestEvent {
             requester_address,
             timestamp: timestamp::now_microseconds(),
-            inbox_owner_address: user_address
+            inbox_owner_address: user_address,
+            inbox_name
         })
 
     }
@@ -340,6 +358,7 @@ module hermes::request_inbox {
             requester_address,
             inbox_owner_address: user_address,
             timestamp: timestamp::now_microseconds(),
+            inbox_name: string_utils::format2(&b"{}:{}", user_address, requester_address)
         })
     }
 
@@ -359,7 +378,8 @@ module hermes::request_inbox {
         emit(RequestDeniedEvent {
             requester_address,
             inbox_owner_address: user_address,
-            timestamp: timestamp::now_microseconds()
+            timestamp: timestamp::now_microseconds(),
+            inbox_name: string_utils::format2(&b"{}{}", user_address, requester_address)
         })
     }
 
@@ -368,6 +388,8 @@ module hermes::request_inbox {
         assert_has_inbox(user_address);
         assert_has_inbox(unwanted_address);
         assert_is_in_inbox(user_address, unwanted_address);
+
+        let inbox_name = get_formatted_inbox_name(user_address, unwanted_address);
 
         let inbox = borrow_global_mut<RequestInbox>(signer::address_of(user));
 
@@ -382,6 +404,7 @@ module hermes::request_inbox {
             timestamp: timestamp::now_microseconds(),
             inbox_owner_address: user_address,
             requester_address: unwanted_address,
+            inbox_name
         })
     }
 
@@ -397,6 +420,7 @@ module hermes::request_inbox {
         assert_has_inbox(user_address);
         assert_has_inbox(unwanted_address);
         assert_is_in_inbox(user_address, unwanted_address);
+        let inbox_name = get_formatted_inbox_name(user_address, unwanted_address);
 
         let inbox = borrow_global_mut<RequestInbox>(user_address);
 
@@ -411,6 +435,7 @@ module hermes::request_inbox {
             timestamp: timestamp::now_microseconds(),
             inbox_owner_address: user_address,
             requester_address: unwanted_address,
+            inbox_name
         })
 
     }
@@ -446,13 +471,14 @@ module hermes::request_inbox {
         assert!(exists<RequestInbox>(user_address),EINBOX_NOT_REGISTERED);
     }
 
-    inline fun add_to_phonebook(inbox_owner: address, user_address: address, envelope: string::String) acquires  RequestInbox {
+    inline fun add_to_phonebook(inbox_owner: address, user_address: address, envelope: string::String, connection_owner: address) acquires  RequestInbox {
         assert_does_not_exist_in_phonebook(inbox_owner, user_address);
         let inbox = borrow_global_mut<RequestInbox>(inbox_owner);
         vector::push_back(&mut inbox.phone_book, Request {
             address: user_address,
             timestamp: timestamp::now_microseconds(),
-            envelope
+            envelope,
+            connection_owner
         })
     }
 
@@ -514,6 +540,36 @@ module hermes::request_inbox {
         delegate.owner_address
     }
 
+    public(friend) fun get_public_key(user_address: address): string::String acquires RequestInbox {
+        let inbox = borrow_global<RequestInbox>(user_address);
+        inbox.public_key
+    }
+
+    #[view]
+    public fun get_connection_owner(sender_address: address, receiver_address: address): address acquires RequestInbox {
+        let inbox = borrow_global<RequestInbox>(sender_address);
+
+        let (_, index) = vector::find(&inbox.phone_book, |request|{
+            let req: &Request = request;
+            req.address == receiver_address
+        });
+
+        let request = vector::borrow(&inbox.phone_book, index);
+
+        request.connection_owner
+    }
+
+    #[view]
+    public fun get_formatted_inbox_name(sender_address: address, receiver_address: address): string::String acquires RequestInbox {
+        let connection_owner = get_connection_owner(sender_address, receiver_address);
+
+        if(connection_owner == sender_address){
+            return string_utils::format2(&b"{}:{}", sender_address, receiver_address)
+        }else{
+            return string_utils::format2(&b"{}:{}", receiver_address, sender_address)
+        }
+    }
+
     public fun is_delegate(addr: address): bool {
         return exists<Delegate>(addr)
     }
@@ -548,7 +604,7 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
 
         let events = emitted_events<RequestInboxRegisterEvent>();
         assert!(vector::length(&events) == 1, 0);
@@ -567,8 +623,8 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
-        register_request_inbox(&second_user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
+        register_request_inbox(&second_user_account, string::utf8(b""));
 
         request_conversation(&second_user_account, signer::address_of(&user_account), string::utf8(b""));
 
@@ -593,8 +649,8 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
-        register_request_inbox(&second_user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
+        register_request_inbox(&second_user_account, string::utf8(b""));
 
         request_conversation(&second_user_account, signer::address_of(&user_account), string::utf8(b""));
 
@@ -625,8 +681,8 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
-        register_request_inbox(&second_user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
+        register_request_inbox(&second_user_account, string::utf8(b""));
 
         request_conversation(&second_user_account, signer::address_of(&user_account), string::utf8(b""));
 
@@ -655,8 +711,8 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
-        register_request_inbox(&second_user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
+        register_request_inbox(&second_user_account, string::utf8(b""));
 
         request_conversation(&second_user_account, signer::address_of(&user_account), string::utf8(b""));
 
@@ -692,7 +748,7 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
         register_delegate(&delegate_account, signer::address_of(&user_account));
 
@@ -715,7 +771,7 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
         register_delegate(&delegate_account, signer::address_of(&user_account));
         remove_delegate(&user_account, signer::address_of(&delegate_account));
@@ -742,10 +798,10 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
         register_delegate(&delegate_account, signer::address_of(&user_account));
-        register_request_inbox(&second_account);
+        register_request_inbox(&second_account, string::utf8(b""));
         create_delegate_link_intent(&second_account, signer::address_of(&second_delegate));
         register_delegate(&second_delegate, signer::address_of(&second_account));
 
@@ -769,10 +825,10 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
         register_delegate(&delegate_account, signer::address_of(&user_account));
-        register_request_inbox(&second_account);
+        register_request_inbox(&second_account, string::utf8(b""));
         create_delegate_link_intent(&second_account, signer::address_of(&second_delegate));
         register_delegate(&second_delegate, signer::address_of(&second_account));
 
@@ -801,10 +857,10 @@ module hermes::request_inbox {
 
         init_module(&admin);
 
-        register_request_inbox(&user_account);
+        register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
         register_delegate(&delegate_account, signer::address_of(&user_account));
-        register_request_inbox(&second_account);
+        register_request_inbox(&second_account, string::utf8(b""));
         create_delegate_link_intent(&second_account, signer::address_of(&second_delegate));
         register_delegate(&second_delegate, signer::address_of(&second_account));
 
