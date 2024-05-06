@@ -88,6 +88,7 @@ module hermes::request_inbox {
         delegate_hid: u64,
         user_hid: u64,
         delegate_address: address,
+        public_key: string::String
     }
 
     #[event]
@@ -109,7 +110,8 @@ module hermes::request_inbox {
     struct Delegate has key, drop {
         owner_address: address,
         timestamp: u64,
-        hid: u64
+        hid: u64,
+        public_key: string::String,
     }
 
     struct State has key {
@@ -162,7 +164,7 @@ module hermes::request_inbox {
         inbox.pending_delegate_link = option::some(delegate_address)
     }
 
-    public entry fun register_delegate(delegate: &signer, user_address: address) acquires State, RequestInbox {
+    public entry fun register_delegate(delegate: &signer, user_address: address, pub: string::String) acquires State, RequestInbox {
         let delegate_address = signer::address_of(delegate);
         let resource_address = account::create_resource_address(&@hermes, SEED);
 
@@ -185,14 +187,16 @@ module hermes::request_inbox {
         move_to(delegate, Delegate {
             hid,
             timestamp: timestamp::now_microseconds(),
-            owner_address: user_address
+            owner_address: user_address,
+            public_key: pub
         });
 
         emit(DelegateRegisterEvent {
             delegate_address,
             owner: user_address,
             delegate_hid: hid,
-            user_hid: inbox.hid
+            user_hid: inbox.hid,
+            public_key: pub
         })
 
     }
@@ -545,6 +549,11 @@ module hermes::request_inbox {
         inbox.public_key
     }
 
+    public(friend) fun get_delegate_public_key(delegate_address: address): string::String acquires Delegate {
+        let delegate = borrow_global<Delegate>(delegate_address);
+        return delegate.public_key
+    }
+
     #[view]
     public fun get_connection_owner(sender_address: address, receiver_address: address): address acquires RequestInbox {
         let inbox = borrow_global<RequestInbox>(sender_address);
@@ -750,7 +759,7 @@ module hermes::request_inbox {
 
         register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
-        register_delegate(&delegate_account, signer::address_of(&user_account));
+        register_delegate(&delegate_account, signer::address_of(&user_account), string::utf8(b""));
 
 
         let inbox_register_events = emitted_events<RequestInboxRegisterEvent>();
@@ -773,7 +782,7 @@ module hermes::request_inbox {
 
         register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
-        register_delegate(&delegate_account, signer::address_of(&user_account));
+        register_delegate(&delegate_account, signer::address_of(&user_account), string::utf8(b""));
         remove_delegate(&user_account, signer::address_of(&delegate_account));
 
 
@@ -800,10 +809,10 @@ module hermes::request_inbox {
 
         register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
-        register_delegate(&delegate_account, signer::address_of(&user_account));
+        register_delegate(&delegate_account, signer::address_of(&user_account), string::utf8(b""));
         register_request_inbox(&second_account, string::utf8(b""));
         create_delegate_link_intent(&second_account, signer::address_of(&second_delegate));
-        register_delegate(&second_delegate, signer::address_of(&second_account));
+        register_delegate(&second_delegate, signer::address_of(&second_account), string::utf8(b""));
 
         delegate_request_conversation(&delegate_account, signer::address_of(&second_account), string::utf8(b""));
 
@@ -827,10 +836,10 @@ module hermes::request_inbox {
 
         register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
-        register_delegate(&delegate_account, signer::address_of(&user_account));
+        register_delegate(&delegate_account, signer::address_of(&user_account), string::utf8(b""));
         register_request_inbox(&second_account, string::utf8(b""));
         create_delegate_link_intent(&second_account, signer::address_of(&second_delegate));
-        register_delegate(&second_delegate, signer::address_of(&second_account));
+        register_delegate(&second_delegate, signer::address_of(&second_account), string::utf8(b""));
 
         delegate_request_conversation(&delegate_account, signer::address_of(&second_account), string::utf8(b""));
 
@@ -859,10 +868,10 @@ module hermes::request_inbox {
 
         register_request_inbox(&user_account, string::utf8(b""));
         create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
-        register_delegate(&delegate_account, signer::address_of(&user_account));
+        register_delegate(&delegate_account, signer::address_of(&user_account), string::utf8(b""));
         register_request_inbox(&second_account, string::utf8(b""));
         create_delegate_link_intent(&second_account, signer::address_of(&second_delegate));
-        register_delegate(&second_delegate, signer::address_of(&second_account));
+        register_delegate(&second_delegate, signer::address_of(&second_account), string::utf8(b""));
 
         delegate_request_conversation(&delegate_account, signer::address_of(&second_account), string::utf8(b""));
 

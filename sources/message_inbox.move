@@ -28,7 +28,18 @@ module hermes::message_inbox {
         ref: string::String,
         inbox_name: string::String,
         sender_public_key: string::String,
-        receiver_public_key: string::String
+        receiver_public_key: string::String,
+        delegate_public_key: string::String
+    }
+
+    #[event]
+    struct ResentEnvelope has store, drop {
+        sender: address,
+        receiver: address,
+        content: string::String, // the newly encrypted message content
+        timestamp: u64,
+        ref: string::String,
+        delegate_public_key: string::String
     }
 
 
@@ -74,7 +85,8 @@ module hermes::message_inbox {
             ref,
             inbox_name,
             sender_public_key: request_inbox::get_public_key(sender_address),
-            receiver_public_key: request_inbox::get_public_key(receiver_address)
+            receiver_public_key: request_inbox::get_public_key(receiver_address),
+            delegate_public_key: string::utf8(b"")
         })
 
     }
@@ -82,6 +94,7 @@ module hermes::message_inbox {
     fun delegate_send_envelope(delegate: &signer, reciever_address: address, content: string::String, ref: string::String) acquires State {
         let delegate_address = signer::address_of(delegate);
         request_inbox::assert_is_delegate(delegate_address);
+        let delegate_public_key = request_inbox::get_delegate_public_key(delegate_address);
         let sender_address = request_inbox::get_delegate_owner(delegate_address);
         let inbox_name = request_inbox::get_formatted_inbox_name(sender_address, reciever_address);
 
@@ -106,9 +119,9 @@ module hermes::message_inbox {
             ref,
             sender_public_key: request_inbox::get_public_key(sender_address),
             receiver_public_key: request_inbox::get_public_key(reciever_address),
-            inbox_name
+            inbox_name,
+            delegate_public_key
         })
-
     }
 
     public entry fun send(sender: &signer, to: address, content: string::String, ref: string::String) acquires State {
@@ -181,10 +194,10 @@ module hermes::message_inbox {
 
         request_inbox::register_request_inbox(&user_account, string::utf8(b""));
         request_inbox::create_delegate_link_intent(&user_account, signer::address_of(&delegate_account));
-        request_inbox::register_delegate(&delegate_account, signer::address_of(&user_account));
+        request_inbox::register_delegate(&delegate_account, signer::address_of(&user_account), string::utf8(b""));
         request_inbox::register_request_inbox(&second_user_account, string::utf8(b""));
         request_inbox::create_delegate_link_intent(&second_user_account, signer::address_of(&second_delegate));
-        request_inbox::register_delegate(&second_delegate, signer::address_of(&second_user_account));
+        request_inbox::register_delegate(&second_delegate, signer::address_of(&second_user_account), string::utf8(b""));
 
         request_inbox::delegate_request_conversation(&delegate_account, signer::address_of(&second_user_account), string::utf8(b""));
         request_inbox::delegate_accept_request(&second_delegate, signer::address_of(&user_account));
