@@ -131,7 +131,6 @@ module hermes::request_inbox {
     }
 
     public entry fun register_request_inbox(user: &signer, pub: string::String) acquires State {
-        // TODO: assert user has a kade username
 
         let resource_address = account::create_resource_address(&@hermes, SEED);
 
@@ -162,6 +161,11 @@ module hermes::request_inbox {
 
         let inbox = borrow_global_mut<RequestInbox>(user_address);
         inbox.pending_delegate_link = option::some(delegate_address)
+    }
+
+    public entry fun register_inbox_and_link_intent(user: &signer, pub: string::String, delegate_address: address) acquires State, RequestInbox {
+        register_request_inbox(user,pub);
+        create_delegate_link_intent(user, delegate_address);
     }
 
     public entry fun register_delegate(delegate: &signer, user_address: address, pub: string::String) acquires State, RequestInbox {

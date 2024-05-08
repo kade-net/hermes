@@ -11,8 +11,5 @@ hermes="0xaf58b8a7f94ecf3666c008312c14bd04bb1cde3ea8f182bb9706be47f598f3b5"
 git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "mainnet"
 subdir = "aptos-move/framework/aptos-framework"
-[dependencies.KADE_NETWORK]
-git = "https://github.com/kade-net/network.git"
-rev = "main"
 
 [dev-dependencies]

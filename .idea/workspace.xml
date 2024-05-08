@@ -4,7 +4,6 @@
     <list default="true" id="8e82fa4f-b3c3-446b-b30f-b51428814729" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Move.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Move.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sources/message_inbox.move" beforeDir="false" afterPath="$PROJECT_DIR$/sources/message_inbox.move" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sources/request_inbox.move" beforeDir="false" afterPath="$PROJECT_DIR$/sources/request_inbox.move" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
