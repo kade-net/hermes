@@ -591,6 +591,11 @@ module hermes::request_inbox {
     public(friend) fun init_for_test(admin: &signer) {
         init_module(admin);
     }
+
+    #[test_only]
+    public entry fun init_request_inbox(admin: &signer){
+        init_module(admin);
+    }
     //====
     // Tests
     //====

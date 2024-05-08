@@ -133,6 +133,11 @@ module hermes::message_inbox {
         }
     }
 
+    #[test_only]
+    public entry fun init_message_inbox(admin: &signer){
+        init_module(admin);
+    }
+
 
     // =====
     // Tests
