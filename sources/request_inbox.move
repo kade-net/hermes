@@ -99,7 +99,14 @@ module hermes::request_inbox {
         owner_hid: u64,
     }
 
-    struct RequestInbox has key {
+    #[event]
+    struct RequestInboxDeleteEvent has store, drop {
+        user_address: address,
+        timestamp: u64,
+        hid: u64
+    }
+
+    struct RequestInbox has key, drop {
         pending_requests: vector<Request>,
         phone_book: vector<Request>,
         pending_delegate_link: Option<address>,
@@ -154,6 +161,27 @@ module hermes::request_inbox {
             hid: user_id,
             public_key: pub
         })
+    }
+
+    fun internal_delete_request_inbox(user_address: address) acquires RequestInbox {
+
+        let inbox = move_from<RequestInbox>(user_address);
+
+        vector::for_each(inbox.phone_book, |req|{
+            let request: Request = req;
+            remove_from_phonebook(request.address, user_address)
+        });
+
+        emit(RequestInboxDeleteEvent {
+            user_address,
+            timestamp: timestamp::now_seconds(),
+            hid: inbox.hid
+        })
+    }
+
+    public entry fun admin_delete_inbox(admin: &signer, user_address: address) acquires  RequestInbox {
+        assert!(signer::address_of(admin) == @hermes, EUSER_NOT_PERMITTED);
+        internal_delete_request_inbox(user_address);
     }
 
     public entry fun create_delegate_link_intent(user: &signer, delegate_address: address) acquires RequestInbox {
@@ -538,6 +566,7 @@ module hermes::request_inbox {
         assert!(!exists, EALREADY_IN_PHONEBOOK);
 
     }
+
 
     public(friend) fun assert_is_delegate(delegate_address: address){
         assert!(exists<Delegate>(delegate_address), ENoDelegateFound);

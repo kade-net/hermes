@@ -32,16 +32,6 @@ module hermes::message_inbox {
         delegate_public_key: string::String
     }
 
-    #[event]
-    struct ResentEnvelope has store, drop {
-        sender: address,
-        receiver: address,
-        content: string::String, // the newly encrypted message content
-        timestamp: u64,
-        ref: string::String,
-        delegate_public_key: string::String
-    }
-
 
     struct State has key {
         signer_capability: account::SignerCapability,
